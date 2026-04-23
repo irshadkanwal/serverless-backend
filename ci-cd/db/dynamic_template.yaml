@@ -1,0 +1,26 @@
+http:
+  routers:
+    analytics-dashboard:
+      rule: "Host(`$DOMAIN_NAME_DASHBOARD`)" 
+      service: analytics-dashboard
+      entryPoints:
+        - websecure
+      tls:
+        certResolver: letsencrypt
+        domains:
+          - main: "$DOMAIN_NAME_DASHBOARD"
+      middlewares:
+        - analytics-dashboard
+    
+  services:
+    analytics-dashboard:
+      loadBalancer:
+        servers:
+          - url: "http://app-analytics-dashboard:5000"
+
+  middlewares:
+    analytics-dashboard:
+      basicAuth:
+        users:
+          - "analytic:$apr1$9JepfcsP$NikZu/iYltaN9egFOJFNR/"
+

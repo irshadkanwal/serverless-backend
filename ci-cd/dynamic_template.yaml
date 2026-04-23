@@ -1,0 +1,24 @@
+http:
+  routers:
+    serverless-backend:
+      rule: "Host(`$DOMAIN_NAME`)" 
+      service: serverless-backend
+      entryPoints:
+        - websecure
+      tls:
+        certResolver: letsencrypt
+        domains:
+          - main: "$DOMAIN_NAME"
+    
+  services:
+    serverless-backend:
+      loadBalancer:
+        servers:
+          - url: "http://app-serverless-backend:8000"
+
+  middlewares:
+    analytics-dashboard:
+      basicAuth:
+        users:
+          - "analytic:$apr1$9JepfcsP$NikZu/iYltaN9egFOJFNR/"
+

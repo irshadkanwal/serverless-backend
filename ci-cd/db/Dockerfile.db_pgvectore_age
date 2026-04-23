@@ -1,0 +1,21 @@
+FROM postgres:16
+
+USER root
+
+RUN apt update && apt install curl unzip gcc make postgresql-server-dev-16 flex bison -y
+
+# Setup аge extension
+RUN curl -L -O https://github.com/apache/age/archive/refs/tags/PG16/v1.5.0-rc0.zip && unzip v1.5.0-rc0.zip
+RUN cd age-PG16-v1.5.0-rc0 && make PG_CONFIG=/usr/lib/postgresql/16/bin/pg_config && make install PG_CONFIG=/usr/lib/postgresql/16/bin/pg_config
+RUN chown postgres:postgres /usr/lib/postgresql/16/lib/age.so && chmod 644 /usr/lib/postgresql/16/lib/age.so
+
+# Setup pgvector extension
+RUN curl -L -O https://github.com/pgvector/pgvector/archive/refs/tags/v0.8.0.zip && unzip v0.8.0.zip
+RUN cd pgvector-0.8.0 && make && make install
+
+COPY --chown=postgres:postgres pgvector_age.sql /docker-entrypoint-initdb.d/009_pgvector_age.sql
+
+WORKDIR /home/postgres
+USER postgres
+ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["postgres"]
