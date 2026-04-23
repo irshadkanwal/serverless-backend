@@ -1,0 +1,44 @@
+name: db-backend
+services:
+  postgres-db-pgvector-age:
+    image: postgres-db-pgvector-age:local
+    container_name: postgres-db-pgvector-age
+    restart: always
+    env_file:
+      - .env_db
+    volumes:
+      - ./postgresql-data:/var/lib/postgresql/data
+    networks:
+      - custom-network
+    ports:
+      - 17419:5432
+
+  app-analytics-dashboard:
+    image: app-analytics-dashboard:local
+    container_name: app-analytics-dashboard
+    restart: always
+    env_file:
+      - .env_dashboard
+    networks:
+      - custom-network
+
+  traefik:
+    image: traefik:v3.3
+    container_name: traefik
+    restart: always
+    command:
+      - "--configFile=/etc/traefik/traefik.yaml"
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./traefik.yaml:/etc/traefik/traefik.yaml
+      - ./dynamic.yaml:/etc/traefik/dynamic.yaml
+      - ./acme.json:/etc/traefik/acme.json
+    networks: 
+      - custom-network
+
+networks:
+  custom-network:
+    name: custom-network
+
